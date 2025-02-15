@@ -1,12 +1,12 @@
 
-FILEPATH = "files/list.txt"
+FILEPATH = "list.txt"
 
 
 def get_todos(filepath: str = FILEPATH) -> list[str]:
     """Read a text file and return each line as a list of to-do items.
 
     Keyword Arguments:
-        filepath -- The file to read (default: {"../files/list.txt"})
+        filepath -- The file to read (default: {"list.txt"})
 
     Returns:
         A list with to-do items
@@ -23,7 +23,7 @@ def write_todos(todo_list: list[str],
         todo_list -- A List of to-do items to write to a file
 
     Keyword Arguments:
-        filepath -- The file to write the list to (default: {"files/list.txt"})
+        filepath -- The file to write the list to (default: {"list.txt"})
     """
     todo_list = [item for item in todo_list]
     with open(filepath, 'w') as file_local:

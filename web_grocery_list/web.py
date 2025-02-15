@@ -1,5 +1,5 @@
 import streamlit as st
-from functions.functions import get_todos, write_todos
+from functions import get_todos, write_todos
 
 todos = get_todos()
 
