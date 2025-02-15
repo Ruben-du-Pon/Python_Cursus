@@ -1,6 +1,11 @@
 import functions.functions as f
 import FreeSimpleGUI as sg
 import time
+import os
+
+if not os.path.exists("files/todos.txt"):
+    with open("files/todos.txt", "w") as file:
+        pass
 
 todos = f.get_todos()
 todos = [item.strip() for item in todos]
