@@ -37,5 +37,5 @@ for grocery in grocery_list:
         del st.session_state[grocery]
         st.rerun()
 
-st.text_input(label="", placeholder="Add grocery item",
+st.text_input(label=" ", placeholder="Add grocery item",
               on_change=add_groceries, key="new_grocery")
