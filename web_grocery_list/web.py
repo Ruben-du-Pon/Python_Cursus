@@ -13,7 +13,7 @@ if not os.path.exists("default_groceries.txt"):
 grocery_list = get_list()
 groceries = get_groceries()
 
-with st.expander("Add grocery item"):
+with st.expander(label="Add grocery item"):
     for grocery in groceries:
         checkbox = st.checkbox(grocery, key=grocery)
         if checkbox:
