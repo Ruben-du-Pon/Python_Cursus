@@ -13,18 +13,24 @@ if not os.path.exists("default_groceries.txt"):
 grocery_list = get_list()
 groceries = get_groceries()
 
-with st.expander(label="Add grocery item"):
-    for grocery in groceries:
-        checkbox = st.checkbox(grocery, key=grocery)
-        if checkbox:
-            grocery_list.append(grocery)
-            write_list(grocery_list)
-
 
 def add_groceries():
     grocery = st.session_state["new_grocery"] + "\n"
     grocery_list.append(grocery)
     write_list(grocery_list)
+    del st.session_state["new_grocery"]
+    st.rerun()
+
+
+with st.expander(label="Add grocery item"):
+    st.text_input(label=" ", placeholder="Add grocery item",
+                  on_change=add_groceries, key="new_grocery")
+    for grocery in groceries:
+        checkbox = st.checkbox(grocery, key=grocery)
+        if checkbox:
+            grocery_list.append(grocery)
+
+    st.button(label="Add", key="add_button", on_click=add_groceries)
 
 
 st.title("Groceries")
@@ -36,6 +42,3 @@ for grocery in grocery_list:
         write_list(grocery_list)
         del st.session_state[grocery]
         st.rerun()
-
-st.text_input(label=" ", placeholder="Add grocery item",
-              on_change=add_groceries, key="new_grocery")

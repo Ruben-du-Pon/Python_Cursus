@@ -42,3 +42,16 @@ def get_groceries(filepath: str = DEFAULT_GROCERIES) -> list[str]:
     with open(filepath, 'r') as file_local:
         groceries_local = file_local.readlines()
     return groceries_local
+
+
+def write_groceries(grocery_list: list[str],
+                    filepath: str = DEFAULT_GROCERIES) -> None:
+    """Write the items in the grocery_list to a file
+    Arguments:
+        grocery_list -- A grocery list to write to a file
+
+    Keyword Arguments:
+        filepath -- The file to write the list to (default: {"default_groceries.txt"})
+    """
+    with open(filepath, 'w') as file_local:
+        file_local.writelines(grocery_list)
