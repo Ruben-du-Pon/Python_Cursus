@@ -1,5 +1,5 @@
 
-FILEPATH = "list.txt"
+FILEPATH = "/list.txt"
 
 
 def get_todos(filepath: str = FILEPATH) -> list[str]:
