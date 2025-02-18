@@ -1,5 +1,5 @@
 import streamlit as st
-from functions import get_list, write_list, get_groceries
+from functions import get_list, write_list, get_groceries, write_groceries
 import os
 
 # Create the files if they don't exist
@@ -15,16 +15,24 @@ groceries = get_groceries()
 
 
 def add_groceries():
-    grocery = st.session_state["new_grocery"] + "\n"
-    grocery_list.append(grocery)
+    for grocery in groceries:
+        if grocery not in grocery_list:
+            grocery_list.append(grocery)
     write_list(grocery_list)
+    st.rerun()
+
+
+def add_default_groceries():
+    grocery = st.session_state["new_grocery"] + "\n"
+    groceries.append(grocery)
+    write_groceries(groceries)
     del st.session_state["new_grocery"]
     st.rerun()
 
 
 with st.expander(label="Add grocery item"):
-    st.text_input(label=" ", placeholder="Add grocery item",
-                  on_change=add_groceries, key="new_grocery")
+    st.text_input(label=" ", placeholder="Add to standard grocery list",
+                  on_change=add_default_groceries, key="new_grocery")
     for grocery in groceries:
         checkbox = st.checkbox(grocery, key=grocery)
         if checkbox:
