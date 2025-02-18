@@ -10,35 +10,67 @@ if not os.path.exists("default_groceries.txt"):
     with open("default_groceries.txt", "w") as file:
         pass
 
+# Initialize lists
 grocery_list = get_list()
 groceries = get_groceries()
+added_groceries = []
+
+# Add custom CSS for in-line buttons
+st.markdown("""
+            <style>
+                div[data-testid="stColumn"] {
+                    width: fit-content !important;
+                    flex: unset;
+                }
+                div[data-testid="stColumn"] * {
+                    width: fit-content !important;
+                }
+            </style>
+            """, unsafe_allow_html=True)
+
+# Add grocery items to the grocery list
 
 
 def add_groceries():
-    for grocery in groceries:
+    for grocery in added_groceries:
         if grocery not in grocery_list:
             grocery_list.append(grocery)
     write_list(grocery_list)
-    st.rerun()
+
+# Remove grocery items from the default grocery list
+
+
+def remove_groceries():
+    for grocery in added_groceries:
+        if grocery in groceries:
+            groceries.remove(grocery)
+    write_groceries(groceries)
+
+# Add grocery items to the default grocery list
 
 
 def add_default_groceries():
     grocery = st.session_state["new_grocery"] + "\n"
-    groceries.append(grocery)
+    if grocery not in groceries:
+        groceries.append(grocery)
     write_groceries(groceries)
     del st.session_state["new_grocery"]
-    st.rerun()
 
 
+# Expander to show the default grocery list and add items to the current list
 with st.expander(label="Add grocery item"):
     st.text_input(label=" ", placeholder="Add to standard grocery list",
                   on_change=add_default_groceries, key="new_grocery")
-    for grocery in groceries:
-        checkbox = st.checkbox(grocery, key=grocery)
-        if checkbox:
-            grocery_list.append(grocery)
-
-    st.button(label="Add", key="add_button", on_click=add_groceries)
+    for index, grocery in enumerate(groceries):
+        checkbox = st.checkbox(grocery, key=index)
+        if checkbox and grocery not in grocery_list:
+            added_groceries.append(grocery)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button(label="Add", key="add_button", on_click=add_groceries)
+    with col2:
+        st.button(label="Remove", key="remove_button",
+                  on_click=remove_groceries)
 
 
 st.title("Groceries")
