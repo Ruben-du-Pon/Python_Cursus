@@ -15,6 +15,9 @@ grocery_list = get_list()
 groceries = get_groceries()
 added_groceries = []
 
+# Set the page title, icon, and layout
+st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
+
 # Add custom CSS for in-line buttons
 st.markdown("""
             <style>
