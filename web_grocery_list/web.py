@@ -70,9 +70,10 @@ with st.expander(label="Add grocery item"):
             added_groceries.append(grocery)
     col1, col2 = st.columns(2)
     with col1:
-        st.button(label="Add", key="add_button", on_click=add_groceries)
+        st.button(label="Add to list", key="add_button",
+                  on_click=add_groceries)
     with col2:
-        st.button(label="Remove", key="remove_button",
+        st.button(label="Remove from standard list", key="remove_button",
                   on_click=remove_groceries)
 
 
