@@ -51,7 +51,8 @@ def write_groceries(grocery_list: list[str],
         grocery_list -- A grocery list to write to a file
 
     Keyword Arguments:
-        filepath -- The file to write the list to (default: {"default_groceries.txt"})
+        filepath -- The file to write the list to
+                    (default: {"default_groceries.txt"})
     """
     with open(filepath, 'w') as file_local:
         file_local.writelines(grocery_list)
