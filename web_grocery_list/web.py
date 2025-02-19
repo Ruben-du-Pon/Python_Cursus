@@ -28,30 +28,42 @@ st.markdown("""
                 div[data-testid="stColumn"] * {
                     width: fit-content !important;
                 }
+                div[data-testid="stMarkdownContainer"] {
+                    font-size: 1rem !important;
+                }
+                div[data-testid="stButton"] {
+                    padding: .15rem !important;
+                }
+                div[data-testid="stButton"] *
+                    padding: .15rem !important;
+                }
+                div[data-testid="stBaseButton-secondary"] {
+                    margin: 0 !important;
+                }
+                div[data-testid="stBaseButton-secondary"] *{
+                    margin: 0 !important;
+                }
             </style>
             """, unsafe_allow_html=True)
 
+
 # Add grocery items to the grocery list
-
-
 def add_groceries():
     for grocery in added_groceries:
         if grocery not in grocery_list:
             grocery_list.append(grocery)
     write_list(grocery_list)
 
+
 # Remove grocery items from the default grocery list
-
-
 def remove_groceries():
     for grocery in added_groceries:
         if grocery in groceries:
             groceries.remove(grocery)
     write_groceries(groceries)
 
+
 # Add grocery items to the default grocery list
-
-
 def add_default_groceries():
     grocery = st.session_state["new_grocery"] + "\n"
     if grocery not in groceries:
@@ -70,13 +82,15 @@ with st.expander(label="Add grocery item"):
             added_groceries.append(grocery)
     col1, col2 = st.columns(2)
     with col1:
-        st.button(label="Add to list", key="add_button",
-                  on_click=add_groceries)
+        st.button(label="Add to list",
+                  key="add_button",
+                  on_click=add_groceries,)
     with col2:
         st.button(label="Remove from standard list", key="remove_button",
                   on_click=remove_groceries)
 
 
+# Main app to display the grocery list
 st.title("Groceries")
 
 for grocery in grocery_list:
