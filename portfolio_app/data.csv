@@ -1,2 +1,2 @@
-title,description,url,image
-Grocery List,An app for making a grocery list from a list of standard items,simplegrocerylist.streamlit.app,img.png
+title;description;url;image
+Grocery List;An app for making a grocery list from a list of standard items;simplegrocerylist.streamlit.app;img.png
