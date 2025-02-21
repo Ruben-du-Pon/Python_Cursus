@@ -1,6 +1,7 @@
+import pandas as pd
 
 FILEPATH = "list.txt"
-DEFAULT_GROCERIES = "default_groceries.txt"
+DEFAULT_GROCERIES = "default_groceries.csv"
 
 
 def get_list(filepath: str = FILEPATH) -> list[str]:
@@ -30,21 +31,21 @@ def write_list(grocery_list: list[str],
         file_local.writelines(grocery_list)
 
 
-def get_groceries(filepath: str = DEFAULT_GROCERIES) -> list[str]:
+def get_groceries(filepath: str = DEFAULT_GROCERIES) -> dict[str: list]:
     """Read a text file and return each line as a list of grocery items.
 
     Keyword Arguments:
-        filepath -- The file to read (default: {"default_groceries.txt"})
+        filepath -- The file to read (default: {"default_groceries.csv"})
 
     Returns:
         A list with grocery items
     """
-    with open(filepath, 'r') as file_local:
-        groceries_local = file_local.readlines()
+    df = pd.read_csv(filepath, header=None)
+    groceries_local = df.to_dict("split")
     return groceries_local
 
 
-def write_groceries(grocery_list: list[str],
+def write_groceries(grocery_list: dict[str: list],
                     filepath: str = DEFAULT_GROCERIES) -> None:
     """Write the items in the grocery_list to a file
     Arguments:
@@ -54,5 +55,5 @@ def write_groceries(grocery_list: list[str],
         filepath -- The file to write the list to
                     (default: {"default_groceries.txt"})
     """
-    with open(filepath, 'w') as file_local:
-        file_local.writelines(grocery_list)
+    df = pd.DataFrame.from_dict(grocery_list)
+    df.to_csv(filepath, index=False)

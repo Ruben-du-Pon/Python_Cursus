@@ -1,14 +1,17 @@
 import streamlit as st
 from functions import get_list, write_list, get_groceries, write_groceries
 import os
+import csv
 
 # Create the files if they don't exist
 if not os.path.exists("list.txt"):
     with open("list.txt", "w") as file:
         pass
-if not os.path.exists("default_groceries.txt"):
-    with open("default_groceries.txt", "w") as file:
-        pass
+if not os.path.exists("default_groceries.csv"):
+    with open("default_groceries.csv", "w") as file:
+        header = ["category", "grocery_item"]
+        writer = csv.writer(file, delimiter=";", lineterminator="\n")
+        writer.writerow(header)
 
 # Initialize lists
 grocery_list = get_list()
@@ -59,27 +62,48 @@ def add_groceries():
 def remove_groceries():
     for grocery in added_groceries:
         if grocery in groceries:
-            groceries.remove(grocery)
+            del groceries[grocery]
     write_groceries(groceries)
 
 
 # Add grocery items to the default grocery list
-def add_default_groceries():
-    grocery = st.session_state["new_grocery"] + "\n"
-    if grocery not in groceries:
-        groceries.append(grocery)
-    write_groceries(groceries)
-    del st.session_state["new_grocery"]
+def add_default_groceries(category):
+    if "new_grocery" in st.session_state:
+        grocery = st.session_state["new_grocery"] + "\n"
+        if not groceries[category]:
+            groceries[category] = []
+        if grocery not in groceries[category]:
+            groceries[category].append(grocery)
+        write_groceries(groceries)
+        del st.session_state["new_grocery"]
 
 
 # Expander to show the default grocery list and add items to the current list
 with st.expander(label="Add grocery item"):
-    st.text_input(label=" ", placeholder="Add to standard grocery list",
-                  on_change=add_default_groceries, key="new_grocery")
-    for index, grocery in enumerate(groceries):
-        checkbox = st.checkbox(grocery, key=index)
-        if checkbox and grocery not in grocery_list:
-            added_groceries.append(grocery)
+    # Drop-down menu to select the category
+    cat = st.selectbox("Select category", ("Fresh Produce", "Meat & Seafood", "Dairy & Eggs", 
+                                           "Bread & Bakery", "Pantry Staples", "Frozen Foods", 
+                                           "Snacks & Sweets", "Beverages", "Condiments & Sauces", 
+                                           "Breakfast & Cereal", "Health Food", "Household & Cleaning Supplies", 
+                                           "Personal Care & Hygiene"), 
+                                           index=None, key="category", placeholder="Select category")
+    
+    # Text input with on_change callback
+    new_grocery_input = st.text_input(label=" ", placeholder="Add to standard grocery list",
+                  key="new_grocery", on_change=None)  # Do not call the function immediately
+
+    # Check if the text input value has changed
+    if new_grocery_input:
+        add_default_groceries(new_grocery_input)
+
+    # Show the default grocery list with checkboxes
+    for category, items in groceries.items():
+        for index, grocery in enumerate(items):
+            checkbox = st.checkbox(grocery, key=f"{category}_{str(index)}")
+            if checkbox and grocery not in grocery_list:
+                added_groceries.append(grocery)
+                grocery_list.append(grocery)
+
     col1, col2 = st.columns(2)
     with col1:
         st.button(label="Add to list",
@@ -90,7 +114,7 @@ with st.expander(label="Add grocery item"):
                   on_click=remove_groceries)
 
 
-# Main app to display the grocery list
+# Display the grocery list
 st.title("Groceries")
 
 for grocery in grocery_list:
