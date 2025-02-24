@@ -18,14 +18,17 @@ categories_col1 = CATEGORIES[:midpoint]
 categories_col2 = CATEGORIES[midpoint:]
 
 # Create the files if they don't exist
-if not os.path.exists("list.txt"):
-    with open("list.txt", "w") as file:
+if not os.path.exists("./list.txt"):
+    with open("./list.txt", "w") as file:
         pass
-if not os.path.exists("default_groceries.csv"):
-    with open("default_groceries.csv", "w") as file:
+if not os.path.exists("./default_groceries.csv"):
+    with open("./default_groceries.csv", "w") as file:
         header = ["category", "grocery_item"]
         writer = csv.writer(file, delimiter=";", lineterminator="\n")
         writer.writerow(header)
+        # Add each category to the CSV
+        for category in CATEGORIES:
+            writer.writerow([category, ""])
 
 # Initialize lists
 grocery_list = get_list()
