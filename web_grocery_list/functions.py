@@ -31,29 +31,52 @@ def write_list(grocery_list: list[str],
         file_local.writelines(grocery_list)
 
 
-def get_groceries(filepath: str = DEFAULT_GROCERIES) -> dict[str: list]:
-    """Read a text file and return each line as a list of grocery items.
+def get_groceries(filepath: str = DEFAULT_GROCERIES) -> dict[str, list]:
+    """Read a CSV file and return a dictionary with category names as keys 
+    and lists of grocery items as values.
 
-    Keyword Arguments:
-        filepath -- The file to read (default: {"default_groceries.csv"})
+    Arguments:
+        filepath -- The file to read
 
     Returns:
-        A list with grocery items
-    """
-    df = pd.read_csv(filepath, header=None)
-    groceries_local = df.to_dict("split")
-    return groceries_local
+        A dictionary with categories as keys and lists of grocery items as values.
+    """  # noqa
+    df = pd.read_csv(filepath, sep=";", dtype=str)
+
+    groceries = {}
+    for _, row in df.iterrows():
+        category = row["category"]
+        items_str = row["grocery_items"]
+
+        # If there are grocery items, split them by commas
+        if pd.notna(items_str) and items_str.strip():
+            items_list = [item.strip()
+                          for item in items_str.split(",")
+                          if item.strip()]
+            groceries[category] = sorted(items_list)
+        else:
+            groceries[category] = []
+
+    return groceries
 
 
-def write_groceries(grocery_list: dict[str: list],
+def write_groceries(grocery_list: dict[str, list],
                     filepath: str = DEFAULT_GROCERIES) -> None:
-    """Write the items in the grocery_list to a file
-    Arguments:
-        grocery_list -- A grocery list to write to a file
+    """Write the items in the grocery_list to a CSV file.
 
-    Keyword Arguments:
-        filepath -- The file to write the list to
-                    (default: {"default_groceries.txt"})
-    """
-    df = pd.DataFrame.from_dict(grocery_list)
-    df.to_csv(filepath, index=False)
+    Arguments:
+        grocery_list -- A dictionary with categories as keys and lists of grocery items as values.
+        filepath -- The file to write the list to.
+    """  # noqa
+    # Sort each category's grocery items alphabetically before writing
+    sorted_groceries = {
+        category: sorted(items) for category, items in grocery_list.items()
+    }
+    df = pd.DataFrame({
+        "category": sorted_groceries.keys(),
+        "grocery_items": [", ".join(items)
+                          for items in sorted_groceries.values()]
+    })
+
+    # Save with semicolon separator to match original format
+    df.to_csv(filepath, sep=";", index=False)
