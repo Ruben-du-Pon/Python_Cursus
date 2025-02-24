@@ -1,7 +1,7 @@
 import pandas as pd
 
-FILEPATH = "./list.txt"
-DEFAULT_GROCERIES = "./default_groceries.csv"
+FILEPATH = "list.txt"
+DEFAULT_GROCERIES = "default_groceries.csv"
 
 
 def get_list(filepath: str = FILEPATH) -> list[str]:
