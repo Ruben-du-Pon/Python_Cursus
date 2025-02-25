@@ -21,20 +21,23 @@ st.write(content1)
 st.header("Our Team")
 team = pd.read_csv("data.csv")
 
+
 def write_team_member(row):
-    st.subheader(row["first name"].capitalize() + " " + row["last name"].capitalize())
+    st.subheader(row["first name"].capitalize() +
+                 " " + row["last name"].capitalize())
     st.write(row["role"])
     st.image("images/" + row["image"])
+
 
 col1, col2, col3 = st.columns(3)
 with col1:
     for index, row in team[0::3].iterrows():
-        write_team_member(row)   
+        write_team_member(row)
 
 with col2:
     for index, row in team[1::3].iterrows():
-        write_team_member(row) 
+        write_team_member(row)
 
 with col3:
     for index, row in team[2::3].iterrows():
-        write_team_member(row)  
+        write_team_member(row)
