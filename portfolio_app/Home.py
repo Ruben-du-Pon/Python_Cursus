@@ -25,7 +25,8 @@ with col1:
     st.markdown(
         f"""
         <div style="display: flex; justify-content: center;">
-            <img src="data:image/png;base64,{img_b64}" width="{new_width}" height="{new_height}">
+            <img src="data:image/png;base64,{img_b64}" \
+            width="{new_width}" height="{new_height}">
         </div>
         """,
         unsafe_allow_html=True
