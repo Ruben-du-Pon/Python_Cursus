@@ -14,7 +14,8 @@ with st.form(key="contact_form"):
         message = f"""\
 Subject: Contact Form Message
 
-From: {user_email}\nMessage:\n{user_message}
+From: {user_email}\n\n
+Message:\n{user_message}
 """
         send_email(message)
         st.info("Your message has been sent.")
