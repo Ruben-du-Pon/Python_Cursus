@@ -49,7 +49,7 @@ def add_groceries():
 
     # Clear checkbox state
     keys_to_clear = [key for key in st.session_state.keys() if any(
-        grocery in key for grocery in added_groceries)]
+        grocery.strip() in key for grocery in added_groceries)]
     for key in keys_to_clear:
         st.session_state[key] = False
 
@@ -61,8 +61,8 @@ def add_groceries():
 def remove_groceries():
     for grocery in added_groceries:
         for key in groceries:
-            if grocery in groceries[key]:
-                groceries[key].remove(grocery)
+            if grocery.strip() in groceries[key]:
+                groceries[key].remove(grocery.strip())
     write_groceries(groceries)
     added_groceries.clear()
 
@@ -87,12 +87,26 @@ def display_grocery_category(category, groceries):
         for grocery in groceries[category]:
             checkbox = st.checkbox(grocery, key=f"{category}_{grocery}")
             if checkbox:
-                added_groceries.append(grocery)
+                added_groceries.append(grocery + "\n")
 
 
-# Add a temporary key to detect submission
-if "submit_flag" not in st.session_state:
-    st.session_state["submit_flag"] = False
+# Process the grocery input
+def process_grocery_input():
+    cat = st.session_state.get("category", None)
+    grocery = st.session_state.get("tmp_grocery", "").strip()
+
+    if not grocery:
+        return
+
+    if cat not in CATEGORIES:
+        st.error("Please select a category")
+        return
+
+    st.session_state["new_grocery"] = grocery
+    add_default_groceries(cat)
+
+    st.session_state["tmp_grocery"] = ""
+
 
 # Expander to show the default grocery list and add items to the current list
 with st.expander(label="Add grocery item"):
@@ -104,17 +118,16 @@ with st.expander(label="Add grocery item"):
     # Text input with on_change callback
     new_grocery_input = st.text_input(label=" ",
                                       placeholder="Add to standard grocery list",  # noqa
-                                      key="new_grocery")
+                                      key="tmp_grocery",
+                                      on_change=process_grocery_input)
 
     # Check if the text input value has changed
-    if new_grocery_input and cat and not st.session_state["submit_flag"]:
+    if new_grocery_input:
+        if cat not in CATEGORIES:
+            st.error("Please select a category")
+            st.stop()
         add_default_groceries(cat)
-        st.session_state["submit_flag"] = True
         st.rerun()
-
-    # Reset the submit flag after rerun
-    if st.session_state["submit_flag"]:
-        st.session_state["submit_flag"] = False
 
     index_links = " | ".join(
         [f"[{category}](#{category.replace(' ', '-').replace('&', '').lower()})"  # noqa
