@@ -17,7 +17,7 @@ midpoint = len(CATEGORIES) // 2
 categories_col1 = CATEGORIES[:midpoint]
 categories_col2 = CATEGORIES[midpoint:]
 
-# Create the files if they don't exist
+# Create files if they don't exist
 if not os.path.exists("list.txt"):
     with open("list.txt", "w") as file:
         pass
@@ -53,7 +53,6 @@ def add_groceries():
     for key in keys_to_clear:
         st.session_state[key] = False
 
-    # Clear the added_groceries list
     added_groceries.clear()
 
 
@@ -121,7 +120,7 @@ with st.expander(label="Add grocery item"):
                                       key="tmp_grocery",
                                       on_change=process_grocery_input)
 
-    # Check if the text input value has changed
+    # Check if a category has been selected
     if new_grocery_input:
         if cat not in CATEGORIES:
             st.error("Please select a category")
@@ -129,10 +128,47 @@ with st.expander(label="Add grocery item"):
         add_default_groceries(cat)
         st.rerun()
 
+    # Links to navigate the categories
     index_links = " | ".join(
         [f"[{category}](#{category.replace(' ', '-').replace('&', '').lower()})"  # noqa
          for category in CATEGORIES])
     st.markdown(index_links)
+
+# Add custom CSS for mobile-friendly layout
+    st.markdown("""
+        <style>
+            /* Make fonts smaller on mobile devices */
+            @media (max-width: 600px) {
+                h5 {
+                    font-size: 1.1rem !important;
+                }
+                .css-1s9bf49 {
+                    font-size: 1rem !important;
+                }
+                .css-15z7xkx {
+                    font-size: 1rem !important;
+                }
+                .css-1v0mbdj {
+                    font-size: 1rem !important;
+                }
+            }
+
+            /* Index links styling for mobile */
+            @media (max-width: 600px) {
+                .css-13wxj5s {
+                    font-size: 0.9rem !important;
+                    display: block;
+                    padding: 5px;
+                    line-height: 1.2;
+                }
+            }
+
+            /* Adjust container width */
+            .container {
+                max-width: 100% !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
