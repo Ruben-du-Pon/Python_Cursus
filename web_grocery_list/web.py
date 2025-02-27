@@ -43,7 +43,7 @@ st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
 def add_groceries():
     for grocery in added_groceries:
         if grocery not in grocery_list:
-            grocery_list.append(grocery)
+            grocery_list.append(grocery.title())
 
     write_list(grocery_list)
 
@@ -73,16 +73,24 @@ def add_default_groceries(category):
         if not groceries[category]:
             groceries[category] = []
         if grocery not in groceries[category]:
-            groceries[category].append(grocery)
+            groceries[category].append(grocery.title())
         write_groceries(groceries)
 
 
 # Display the default list categories
 def display_grocery_category(category, groceries):
     if category in groceries:
-        anchor = category.replace(" ", "-").replace("&", "").lower()
+        # Clean up the category name for the anchor
+        anchor = category.replace(" ", "-")
+        anchor = anchor.replace("&", "")
+        anchor = anchor.replace("--", "-")
+        anchor = anchor.lower()
+
+        # Display the category name
         st.markdown(f'<h5 id="{anchor}">{category}</h5>',
                     unsafe_allow_html=True)
+
+        # Display the grocery items
         for grocery in groceries[category]:
             checkbox = st.checkbox(grocery, key=f"{category}_{grocery}")
             if checkbox:
@@ -129,46 +137,59 @@ with st.expander(label="Add grocery item"):
         st.rerun()
 
     # Links to navigate the categories
-    index_links = " | ".join(
-        [f"[{category}](#{category.replace(' ', '-').replace('&', '').lower()})"  # noqa
-         for category in CATEGORIES])
+    category_links = []
+
+    # Loop through categories and create individual link for each
+    for category in CATEGORIES:
+        # Clean and format the category name
+        clean_category = category.replace(
+            ' ', '-').replace('&', '').replace('--', '-').lower()
+
+        # Create the markdown link
+        link = f"[{category}](#{clean_category})"
+
+        # Append the link to the list
+        category_links.append(link)
+
+    # Join all links with a separator and display
+    index_links = " | ".join(category_links)
     st.markdown(index_links)
 
-# Add custom CSS for mobile-friendly layout
+    # Add custom CSS for mobile-friendly layout
     st.markdown("""
-        <style>
-            /* Make fonts smaller on mobile devices */
-            @media (max-width: 600px) {
-                h5 {
-                    font-size: 1.1rem !important;
+            <style>
+                /* Make fonts smaller on mobile devices */
+                @media (max-width: 600px) {
+                    h5 {
+                        font-size: 1.1rem !important;
+                    }
+                    .css-1s9bf49 {
+                        font-size: 1rem !important;
+                    }
+                    .css-15z7xkx {
+                        font-size: 1rem !important;
+                    }
+                    .css-1v0mbdj {
+                        font-size: 1rem !important;
+                    }
                 }
-                .css-1s9bf49 {
-                    font-size: 1rem !important;
-                }
-                .css-15z7xkx {
-                    font-size: 1rem !important;
-                }
-                .css-1v0mbdj {
-                    font-size: 1rem !important;
-                }
-            }
 
-            /* Index links styling for mobile */
-            @media (max-width: 600px) {
-                .css-13wxj5s {
-                    font-size: 0.9rem !important;
-                    display: block;
-                    padding: 5px;
-                    line-height: 1.2;
+                /* Index links styling for mobile */
+                @media (max-width: 600px) {
+                    .css-13wxj5s {
+                        font-size: 0.9rem !important;
+                        display: block;
+                        padding: 5px;
+                        line-height: 1.2;
+                    }
                 }
-            }
 
-            /* Adjust container width */
-            .container {
-                max-width: 100% !important;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+                /* Adjust container width */
+                .container {
+                    max-width: 100% !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:

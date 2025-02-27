@@ -15,6 +15,8 @@ def get_list(filepath: str = FILEPATH) -> list[str]:
     """
     with open(filepath, 'r') as file_local:
         list_local = file_local.readlines()
+
+    list_local = [item.strip().title() for item in list_local]
     return list_local
 
 
@@ -54,6 +56,8 @@ def get_groceries(filepath: str = DEFAULT_GROCERIES) -> dict[str, list]:
                           for item in items_str.split(",")
                           if item.strip()]
             groceries[category] = sorted(items_list)
+            groceries[category] = [item.title()
+                                   for item in groceries[category]]
         else:
             groceries[category] = []
 
@@ -70,7 +74,8 @@ def write_groceries(grocery_list: dict[str, list],
     """  # noqa
     # Sort each category's grocery items alphabetically before writing
     sorted_groceries = {
-        category: sorted(items) for category, items in grocery_list.items()
+        category: sorted([item.title() for item in items])
+        for category, items in grocery_list.items()
     }
     df = pd.DataFrame({
         "category": sorted_groceries.keys(),
