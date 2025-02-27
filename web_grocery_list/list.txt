@@ -1,4 +1,1 @@
-Mango
-Salami
-Brinta
-Cruesli
+MangoSalamiBrintaCruesli

@@ -119,7 +119,8 @@ with st.expander(label="Add grocery item"):
     with col3:
         st.button(label="Add to list", key="add_button",
                   on_click=functions.add_groceries(grocery_list,
-                                                   added_groceries))
+                                                   added_groceries,
+                                                   st.session_state))
     with col4:
         st.button(label="Remove from standard list",
                   key="remove_button",

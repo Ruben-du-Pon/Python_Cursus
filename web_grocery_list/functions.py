@@ -133,20 +133,22 @@ def process_grocery_input(session_state: dict[str, Any],
 
 
 def add_groceries(added_groceries: list[str],
-                  grocery_list: list[str]) -> None:
+                  grocery_list: list[str],
+                  session_state: dict[str, Any]) -> None:
     """
     Add grocery items to the default grocery list.
 
     Arguments:
         added_groceries -- The list of added groceries
         grocery_list -- The default grocery list
+        session_state -- The Streamlit session state
     """
     for grocery in added_groceries:
         if grocery not in grocery_list:
             grocery_list.append(grocery.title())
 
     write_list(grocery_list)
-    clear_session_state()
+    clear_session_state(session_state, added_groceries)
     added_groceries.clear()
 
 
