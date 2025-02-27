@@ -46,12 +46,10 @@ def add_groceries() -> None:
         grocery_list -- The grocery list
         session_state -- The Streamlit session state
     """
-    print(f"added_groceries: {added_groceries}")
     for grocery in added_groceries:
         if grocery not in grocery_list:
             grocery_list.append(grocery.title())
 
-    print(f"grocery_list: {grocery_list}")
     functions.write_list(grocery_list)
     functions.clear_session_state(st.session_state, added_groceries)
     added_groceries.clear()
@@ -155,7 +153,6 @@ for grocery in grocery_list:
     checkbox = st.checkbox(grocery, key=grocery)
     if checkbox:
         grocery_list.remove(grocery)
-        print(grocery_list)
         functions.write_list(grocery_list)
         del st.session_state[grocery]
         st.rerun()

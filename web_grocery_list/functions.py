@@ -213,4 +213,4 @@ def display_grocery_category(category: str, groceries: dict[str, list],
         for grocery in groceries[category]:
             checkbox = st.checkbox(grocery, key=f"{category}_{grocery}")
             if checkbox:
-                added_groceries.append(grocery + "\n")
+                added_groceries.append(grocery)
