@@ -34,7 +34,11 @@ def write_list(grocery_list: list[str],
         filepath -- The file to write the list to (default: {"list.txt"})
     """
     with open(filepath, 'w') as file_local:
-        file_local.writelines(grocery_list)
+        for item in grocery_list:
+            # Add newline if it's not already there
+            if not item.endswith("\n"):
+                item += "\n"
+            file_local.write(item)
 
 
 def get_groceries(filepath: str = DEFAULT_GROCERIES) -> dict[str, list]:
@@ -109,7 +113,8 @@ def clear_session_state(session_state: dict[str, Any],
 
 
 def process_grocery_input(session_state: dict[str, Any],
-                          CATEGORIES: list) -> None:
+                          CATEGORIES: list,
+                          groceries: dict[str, list]) -> None:
     """
     Process the grocery input and add it to the default grocery list
 
@@ -128,28 +133,9 @@ def process_grocery_input(session_state: dict[str, Any],
         return
 
     session_state["new_grocery"] = grocery
-    add_default_groceries(cat)
+    add_default_groceries(cat, session_state, groceries)
     session_state["tmp_grocery"] = ""
-
-
-def add_groceries(added_groceries: list[str],
-                  grocery_list: list[str],
-                  session_state: dict[str, Any]) -> None:
-    """
-    Add grocery items to the default grocery list.
-
-    Arguments:
-        added_groceries -- The list of added groceries
-        grocery_list -- The default grocery list
-        session_state -- The Streamlit session state
-    """
-    for grocery in added_groceries:
-        if grocery not in grocery_list:
-            grocery_list.append(grocery.title())
-
-    write_list(grocery_list)
-    clear_session_state(session_state, added_groceries)
-    added_groceries.clear()
+    st.rerun()
 
 
 def remove_groceries(groceries: dict[str, list],
