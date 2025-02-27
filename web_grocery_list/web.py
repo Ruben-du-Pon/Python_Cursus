@@ -1,5 +1,5 @@
 import streamlit as st
-from functions import get_list, write_list, get_groceries, write_groceries
+import functions
 import os
 import csv
 
@@ -31,12 +31,20 @@ if not os.path.exists("default_groceries.csv"):
             writer.writerow([category, ""])
 
 # Initialize lists
-grocery_list = get_list()
-groceries = get_groceries()
+grocery_list = functions.get_list()
+groceries = functions.get_groceries()
 added_groceries = []
 
 # Set the page title, icon, and layout
 st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
+
+
+# Clear the session state
+def clear_session_state():
+    keys_to_clear = [key for key in st.session_state.keys() if any(
+        grocery.strip() in key for grocery in added_groceries)]
+    for key in keys_to_clear:
+        st.session_state[key] = False
 
 
 # Add grocery items to the grocery list
@@ -45,14 +53,8 @@ def add_groceries():
         if grocery not in grocery_list:
             grocery_list.append(grocery.title())
 
-    write_list(grocery_list)
-
-    # Clear checkbox state
-    keys_to_clear = [key for key in st.session_state.keys() if any(
-        grocery.strip() in key for grocery in added_groceries)]
-    for key in keys_to_clear:
-        st.session_state[key] = False
-
+    functions.write_list(grocery_list)
+    clear_session_state()
     added_groceries.clear()
 
 
@@ -62,7 +64,7 @@ def remove_groceries():
         for key in groceries:
             if grocery.strip() in groceries[key]:
                 groceries[key].remove(grocery.strip())
-    write_groceries(groceries)
+    functions.write_groceries(groceries)
     added_groceries.clear()
 
 
@@ -74,17 +76,14 @@ def add_default_groceries(category):
             groceries[category] = []
         if grocery not in groceries[category]:
             groceries[category].append(grocery.title())
-        write_groceries(groceries)
+        functions.write_groceries(groceries)
 
 
 # Display the default list categories
 def display_grocery_category(category, groceries):
     if category in groceries:
         # Clean up the category name for the anchor
-        anchor = category.replace(" ", "-")
-        anchor = anchor.replace("&", "")
-        anchor = anchor.replace("--", "-")
-        anchor = anchor.lower()
+        anchor = functions.clean_category_name(category)
 
         # Display the category name
         st.markdown(f'<h5 id="{anchor}">{category}</h5>',
@@ -111,7 +110,6 @@ def process_grocery_input():
 
     st.session_state["new_grocery"] = grocery
     add_default_groceries(cat)
-
     st.session_state["tmp_grocery"] = ""
 
 
@@ -122,7 +120,7 @@ with st.expander(label="Add grocery item"):
                        index=None, key="category",
                        placeholder="Select category")
 
-    # Text input with on_change callback
+    # Text input to add a new grocery item
     new_grocery_input = st.text_input(label=" ",
                                       placeholder="Add to standard grocery list",  # noqa
                                       key="tmp_grocery",
@@ -137,22 +135,9 @@ with st.expander(label="Add grocery item"):
         st.rerun()
 
     # Links to navigate the categories
-    category_links = []
-
-    # Loop through categories and create individual link for each
-    for category in CATEGORIES:
-        # Clean and format the category name
-        clean_category = category.replace(
-            ' ', '-').replace('&', '').replace('--', '-').lower()
-
-        # Create the markdown link
-        link = f"[{category}](#{clean_category})"
-
-        # Append the link to the list
-        category_links.append(link)
-
-    # Join all links with a separator and display
-    index_links = " | ".join(category_links)
+    index_links = " | ".join([
+        f"[{category}](#{functions.clean_category_name(category)})"
+        for category in CATEGORIES])
     st.markdown(index_links)
 
     # Add custom CSS for mobile-friendly layout
@@ -218,6 +203,6 @@ for grocery in grocery_list:
     checkbox = st.checkbox(grocery, key=grocery)
     if checkbox:
         grocery_list.remove(grocery)
-        write_list(grocery_list)
+        functions.write_list(grocery_list)
         del st.session_state[grocery]
         st.rerun()

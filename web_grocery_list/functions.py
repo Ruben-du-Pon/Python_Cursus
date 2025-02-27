@@ -85,3 +85,19 @@ def write_groceries(grocery_list: dict[str, list],
 
     # Save with semicolon separator to match original format
     df.to_csv(filepath, sep=";", index=False)
+
+
+def clean_category_name(category: str) -> str:
+    """Clean the category name to be used as a URL path.
+
+    Arguments:
+        category -- The category name to clean
+
+    Returns:
+        A cleaned category name
+    """
+    category = category.lower()
+    category = category.replace(" ", "-")
+    category = category.replace("&", "")
+    category = category.replace("--", "-")
+    return category
