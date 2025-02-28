@@ -157,7 +157,7 @@ def process_grocery_input(session_state: dict[str, Any],
         groceries: Dictionary mapping categories to their grocery items
 
     Returns:
-        None        
+        None
     """
     cat = session_state.get("category", None)
     grocery = session_state.get("tmp_grocery", "").strip()
@@ -200,7 +200,7 @@ def display_grocery_category(category: str, groceries: dict[str, list],
             justify-content: space-between;
             align-items: center;">
                 <h5 style="margin: 0;" id="{anchor}">{category}</h5>
-                <a href="#top" style="font-size: 0.8em; 
+                <a href="#top" style="font-size: 0.8em;
                 text-decoration: none;">Back to Top</a>
             </div>
             ''',
