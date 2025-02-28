@@ -13,8 +13,8 @@ url = "https://newsapi.org/v2/everything?" \
       f"apiKey={api_key}&" \
       "language=en"
 
-request = requests.get(url)
-content = request.json()
+response = requests.get(url)
+content = response.json()
 
 articles = content["articles"][:20]
 
