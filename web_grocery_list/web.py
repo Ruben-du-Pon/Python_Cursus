@@ -2,29 +2,24 @@ import streamlit as st
 import functions
 import os
 import csv
+from config import CATEGORIES, FILEPATH, DEFAULT_GROCERIES, CSV_HEADERS
+from styles import MOBILE_STYLES
 
-CATEGORIES = ("Fresh Produce", "Meat & Seafood",
-              "Dairy & Eggs", "Bread & Bakery",
-              "Pantry Staples", "Frozen Foods",
-              "Snacks & Sweets", "Beverages",
-              "Condiments & Sauces",
-              "Breakfast & Cereal", "Health Food",
-              "Household & Cleaning Supplies",
-              "Personal Care & Hygiene",
-              "Pet Supplies")
 
-midpoint = len(CATEGORIES) // 2
-categories_col1 = CATEGORIES[:midpoint]
-categories_col2 = CATEGORIES[midpoint:]
+# Set the page title, icon, and layout
+st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
 
+# Add an anchor point at the top
+st.markdown('<div id="top" style="position: absolute; top: 0;"></div>',
+            unsafe_allow_html=True)
 
 # Create files if they don't exist
-if not os.path.exists("list.txt"):
-    with open("list.txt", "w") as file:
+if not os.path.exists(FILEPATH):
+    with open(FILEPATH, "w") as file:
         pass
-if not os.path.exists("default_groceries.csv"):
-    with open("default_groceries.csv", "w") as file:
-        header = ["category", "grocery_items"]
+if not os.path.exists(DEFAULT_GROCERIES):
+    with open(DEFAULT_GROCERIES, "w") as file:
+        header = CSV_HEADERS
         writer = csv.writer(file, delimiter=";", lineterminator="\n")
         writer.writerow(header)
         # Add each category to the CSV
@@ -35,6 +30,7 @@ if not os.path.exists("default_groceries.csv"):
 grocery_list = functions.get_list()
 groceries = functions.get_groceries()
 added_groceries = []
+categories_col1, categories_col2 = functions.split_categories(groceries)
 
 
 def add_groceries() -> None:
@@ -55,10 +51,6 @@ def add_groceries() -> None:
     added_groceries.clear()
 
 
-# Set the page title, icon, and layout
-st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
-
-
 # Expander to show the default grocery list and add items to the current list
 with st.expander(label="Add grocery item"):
     # Drop-down menu to select the category
@@ -70,7 +62,7 @@ with st.expander(label="Add grocery item"):
     new_grocery_input = st.text_input(label=" ",
                                       placeholder="Add to standard grocery list",  # noqa
                                       key="tmp_grocery",
-                                      on_change=functions.process_grocery_input(st.session_state, CATEGORIES, groceries))  # noqa
+                                      on_change=functions.process_grocery_input(st.session_state, groceries))  # noqa
 
     # Check if a category has been selected
     if new_grocery_input:
@@ -87,40 +79,7 @@ with st.expander(label="Add grocery item"):
     st.markdown(index_links)
 
     # Add custom CSS for mobile-friendly layout
-    st.markdown("""
-            <style>
-                /* Make fonts smaller on mobile devices */
-                @media (max-width: 600px) {
-                    h5 {
-                        font-size: 1.1rem !important;
-                    }
-                    .css-1s9bf49 {
-                        font-size: 1rem !important;
-                    }
-                    .css-15z7xkx {
-                        font-size: 1rem !important;
-                    }
-                    .css-1v0mbdj {
-                        font-size: 1rem !important;
-                    }
-                }
-
-                /* Index links styling for mobile */
-                @media (max-width: 600px) {
-                    .css-13wxj5s {
-                        font-size: 0.9rem !important;
-                        display: block;
-                        padding: 5px;
-                        line-height: 1.2;
-                    }
-                }
-
-                /* Adjust container width */
-                .container {
-                    max-width: 100% !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
+    st.markdown(MOBILE_STYLES, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -142,8 +101,8 @@ with st.expander(label="Add grocery item"):
     with col4:
         st.button(label="Remove from standard list",
                   key="remove_button",
-                  on_click=lambda: functions.remove_groceries(groceries,
-                                                              added_groceries))
+                  on_click=functions.remove_groceries,
+                  args=(groceries, added_groceries))
 
 
 # Display the grocery list
