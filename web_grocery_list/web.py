@@ -1,8 +1,7 @@
 import streamlit as st
 import functions
 import os
-import csv
-from config import CATEGORIES, FILEPATH, DEFAULT_GROCERIES, CSV_HEADERS
+from config import CATEGORIES, FILEPATH
 from styles import MOBILE_STYLES
 
 
@@ -17,14 +16,6 @@ st.markdown('<div id="top" style="position: absolute; top: 0;"></div>',
 if not os.path.exists(FILEPATH):
     with open(FILEPATH, "w") as file:
         pass
-if not os.path.exists(DEFAULT_GROCERIES):
-    with open(DEFAULT_GROCERIES, "w") as file:
-        header = CSV_HEADERS
-        writer = csv.writer(file, delimiter=";", lineterminator="\n")
-        writer.writerow(header)
-        # Add each category to the CSV
-        for category in CATEGORIES:
-            writer.writerow([category, ""])
 
 # Initialize lists
 grocery_list = functions.get_list()
