@@ -15,7 +15,33 @@ supabase_key = st.secrets["SUPABASE_KEY"]
 supabase = create_client(supabase_url, supabase_key)
 
 
+def better_title(text: str) -> str:
+    """
+    Custom title function that properly handles apostrophes.
+
+    Arguments:
+        text -- The text to be formatted
+
+    Returns:
+        str: The formatted text
+
+    Example:
+        >>> better_title("sam's club")
+        "Sam's Club"
+    """
+    exceptions = ["'s", "'t", "'ll", "'re", "'ve", "'m", "'d"]
+    words = text.title().split()
+
+    for i, word in enumerate(words):
+        for exception in exceptions:
+            if exception.title() in word:
+                words[i] = word.replace(exception.title(), exception)
+
+    return " ".join(words)
+
 # Core File Operation Functions
+
+
 def get_list(filepath: str = FILEPATH) -> list[str]:
     """
     Read a text file and return each line as a grocery list.
@@ -63,7 +89,13 @@ def get_groceries() -> dict[str, list]:
     """  # noqa
     try:
         response = supabase.table('default_groceries').select("*").execute()
-        return response.data[0]['groceries'] if response.data else {}
+        if response.data:
+            groceries = response.data[0]['groceries']
+            groceries = {cat: sorted(better_title(item) for item in items)
+                         for cat, items in groceries.items()}
+            return groceries
+        else:
+            return {}
     except Exception as e:
         print("Error in get_groceries:", str(e))
         st.info("Error in get_groceries:", str(e))
