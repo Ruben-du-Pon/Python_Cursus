@@ -3,12 +3,15 @@ import streamlit as st
 from typing import Any
 from config import FILEPATH, CATEGORIES
 from dotenv import load_dotenv
+# import os
 
 load_dotenv()
 
 # Initialize Supabase client
 supabase_url = st.secrets["SUPABASE_URL"]
 supabase_key = st.secrets["SUPABASE_KEY"]
+# supabase_url = os.getenv("SUPABASE_URL")
+# supabase_key = os.getenv("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
 
 
@@ -53,14 +56,18 @@ def write_list(grocery_list: list[str],
 
 def get_groceries() -> dict[str, list]:
     """
-    Read a CSV file and return a dictionary with categories as keys and lists of grocery items as values.
+    Read a supabase table and return a dictionary with categories as keys and lists of grocery items as values.
 
     Returns:
         A dictionary with categories as keys and lists of grocery items as values.
     """  # noqa
-    response = supabase.table('default_groceries').select("*").execute()
-    print(response.data)
-    return response.data[0] if response.data else {}
+    try:
+        response = supabase.table('default_groceries').select("*").execute()
+        return response.data[0]['groceries'] if response.data else {}
+    except Exception as e:
+        print("Error in get_groceries:", str(e))
+        st.info("Error in get_groceries:", str(e))
+        return {}
 
 
 def write_groceries(groceries: dict[str, list]) -> None:
