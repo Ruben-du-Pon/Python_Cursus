@@ -1,4 +1,4 @@
-"category;grocery_items"
+{
 "Fresh Produce":["Apple"," Avocado"," Banana"," Blueberries"," Carrot"," Courgette"," Cucumber"," Green Grapes"," Lettuce"," Mandarijnen"," Mango"," Mini Carrots"," Mini Cucumber"," Mini Tomatoes"," Orange"," Paprika"," Red Grapes"," Rucola"," Snoep Paprika'S"," Spinach"," Strawberries"," Tomatoes"],
 "Meat & Seafood":["Chicken Brest"," Minced Meat"," Salami"," Salmon"],
 "Dairy & Eggs":["Butter"," Cheese Slices"," Cumin Cheese Slices"," Eggs"," Lactose Free Milk"," Milk"," Mini-Mozzarella"," Yoghurt"],
@@ -12,4 +12,5 @@
 "Health Food":["Protein Powder"],
 "Household & Cleaning Supplies":["Kitchen Paper Towels"," Laundry Pads Black"," Laundry Pads Colour"," Laundry Pads White"," Toilet Paper"," Trash Bags"," Wet Toilet Paper"],
 "Personal Care & Hygiene":["Deodorant Ruben"," Deodorant Özenç"," Palmers Coconut Cream"," Toothpaste Hisar"," Toothpaste Ruben"," Toothpaste Özenç"],
-"Pet Supplies":["Cat Food Dry"," Cat Food Wet"," Cat Snacks"," Dental Sticks"," Dog Food Dry"," Dog Food Wet"," Dog Snacks"],
+"Pet Supplies":["Cat Food Dry"," Cat Food Wet"," Cat Snacks"," Dental Sticks"," Dog Food Dry"," Dog Food Wet"," Dog Snacks"]
+}
