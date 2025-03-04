@@ -59,6 +59,7 @@ def get_groceries() -> dict[str, list]:
         A dictionary with categories as keys and lists of grocery items as values.
     """  # noqa
     response = supabase.table('default_groceries').select("*").execute()
+    print(response.data)
     return response.data[0] if response.data else {}
 
 
