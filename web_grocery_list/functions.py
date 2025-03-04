@@ -203,6 +203,7 @@ def split_categories(groceries: dict[str, list],
     Returns:
         Two lists of categories for two columns.
     """
+    print(groceries)
     total_items = sum(len(groceries[cat]) for cat in categories)
     target_items = total_items // 2
 
