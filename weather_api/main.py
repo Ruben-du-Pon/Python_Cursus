@@ -4,10 +4,12 @@ from flask import Flask, render_template  # , request
 
 app = Flask(__name__)
 
+stations = pd.read_csv("data/stations.txt", skiprows=17)
+
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", data=stations.to_html())
 
 
 @app.route("/api/v1/<station>/<date>")
