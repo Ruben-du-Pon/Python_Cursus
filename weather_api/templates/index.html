@@ -3,13 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <title>Weather Data API</title>
-    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
   </head>
   <body>
     <div class="container">
       <h1>Weather Data API</h1>
       <p>URL format: http://127.0.0.1:5000/api/v1/station/date</p>
-      <p>Example: http://127.0.0.1:5000/api/v1/1/1984-07-17</p>
+      <p>
+        For one station at one date: http://127.0.0.1:5000/api/v1/10/1984-07-17
+      </p>
+      <p>For one station all dates: http://127.0.0.1:5000/api/v1/10</p>
       <p>{{data|safe}}</p>
     </div>
   </body>
