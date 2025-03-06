@@ -1,17 +1,16 @@
-from supabase import create_client
+import logging
 import streamlit as st
+from supabase import create_client
 from typing import Any
-from config import FILEPATH, CATEGORIES
-from dotenv import load_dotenv
-# import os
+from config import CATEGORIES, SUPABASE_DEFAULT_TABLE, SUPABASE_GROCERY_TABLE
 
-load_dotenv()
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize Supabase client
 supabase_url = st.secrets["SUPABASE_URL"]
 supabase_key = st.secrets["SUPABASE_KEY"]
-# supabase_url = os.getenv("SUPABASE_URL")
-# supabase_key = os.getenv("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
 
 
@@ -42,42 +41,62 @@ def better_title(text: str) -> str:
 # Core File Operation Functions
 
 
-def get_list(filepath: str = FILEPATH) -> list[str]:
+def get_list() -> list[str]:
     """
-    Read a text file and return each line as a grocery list.
-
-    Keyword Arguments:
-        filepath -- The file to read (default: {"list.txt"})
+    Retrieve the grocery list from Supabase.
 
     Returns:
-        A grocery list
+        list[str]: A list of grocery items with proper title casing.
+                  Returns empty list if no data or error occurs.
+
+    Raises:
+        Shows Streamlit error message if database operation fails.
+
+    Example:
+        >>> get_list()
+        ['Milk', 'Bread', 'Eggs']
     """
-    with open(filepath, 'r') as file_local:
-        list_local = file_local.readlines()
+    try:
+        with st.spinner('Loading grocery list...'):
+            response = supabase.table(
+                SUPABASE_GROCERY_TABLE).select("*").execute()
+            if response.data:
+                # Extract the "groceries" list from the JSON
+                groceries = response.data[0]['groceries']
+                # Return the list with proper title casing
+                return [better_title(item) for item in groceries]
+            else:
+                return []
+    except Exception as e:
+        logger.error(f"Error in get_list: {e}")
+        st.error(f"Error in get_list: {str(e)}")
+        return []
 
-    list_local = [item.strip().title() for item in list_local]
-    return list_local
 
-
-def write_list(grocery_list: list[str],
-               filepath: str = FILEPATH) -> None:
+def write_list(grocery_list: list[str]) -> None:
     """
-    Write the items in the grocery_list to a file
-    Arguments:
-        grocery_list -- A List of to-do items to write to a file
+    Save the grocery list to Supabase.
 
-    Keyword Arguments:
-        filepath -- The file to write the list to (default: {"list.txt"})
+    Args:
+        grocery_list (list[str]): List of grocery items to save.
 
     Returns:
         None
+
+    Raises:
+        Shows Streamlit error message if database operation fails.
+
+    Example:
+        >>> write_list(['Milk', 'Bread', 'Eggs'])
     """
-    with open(filepath, 'w') as file_local:
-        for item in grocery_list:
-            # Add newline if it's not already there
-            if not item.endswith("\n"):
-                item += "\n"
-            file_local.write(item)
+    try:
+        supabase.table(SUPABASE_GROCERY_TABLE).upsert({
+            'id': 1,  # Use a constant ID for the single record
+            'groceries': grocery_list
+        }).execute()
+    except Exception as e:
+        logger.error(f"Error in write_list: {e}")
+        st.error(f"Error in write_list: {str(e)}")
 
 
 def get_groceries() -> dict[str, list]:
@@ -86,9 +105,16 @@ def get_groceries() -> dict[str, list]:
 
     Returns:
         A dictionary with categories as keys and lists of grocery items as values.
+
+    Raises:
+        Shows Streamlit error message if database operation fails.
+
+    Example:
+        >>> get_groceries()
+        {'Fresh Produce': ['Apples', 'Bananas'], 'Meat & Seafood': ['Chicken', 'Fish']}
     """  # noqa
     try:
-        response = supabase.table('default_groceries').select("*").execute()
+        response = supabase.table(SUPABASE_DEFAULT_TABLE).select("*").execute()
         if response.data:
             groceries = response.data[0]['groceries']
             groceries = {cat: sorted(better_title(item) for item in items)
@@ -97,8 +123,8 @@ def get_groceries() -> dict[str, list]:
         else:
             return {}
     except Exception as e:
-        print("Error in get_groceries:", str(e))
-        st.info("Error in get_groceries:", str(e))
+        logger.error(f"Error in get_groceries: {e}")
+        st.error(f"Error in get_groceries: {str(e)}")
         return {}
 
 
@@ -111,11 +137,21 @@ def write_groceries(groceries: dict[str, list]) -> None:
 
     Returns:
         None
+
+    Raises:
+        Shows Streamlit error message if database operation fails.
+
+    Example:
+        >>> write_groceries({'Fresh Produce': ['Apples', 'Bananas'], 'Meat & Seafood': ['Chicken', 'Fish']})
     """  # noqa
-    supabase.table('default_groceries').upsert({
-        'id': 1,  # Use a constant ID for the single record
-        'groceries': groceries
-    }).execute()
+    try:
+        supabase.table(SUPABASE_DEFAULT_TABLE).upsert({
+            'id': 1,  # Use a constant ID for the single record
+            'groceries': groceries
+        }).execute()
+    except Exception as e:
+        logger.error(f"Error in write_groceries: {e}")
+        st.error(f"Error in write_groceries: {str(e)}")
 
 
 # Grocery Management Functions
@@ -231,18 +267,26 @@ def display_grocery_category(category: str, groceries: dict[str, list],
 
 
 def split_categories(groceries: dict[str, list],
-                     categories: list = CATEGORIES):
+                     categories: list = CATEGORIES) -> tuple[list[str],
+                                                             list[str]]:
     """
     Split categories into two columns based on total items.
 
     Arguments:
-        categories -- List of category names
         groceries -- Dictionary of groceries with category names as keys
+
+    Keyword Arguments:
+        categories -- List of category names
 
     Returns:
         Two lists of categories for two columns.
+
+    Example:
+        >>> groceries = {"Fresh Produce": ["Apples", "Bananas"],
+                        "Meat & Seafood": ["Chicken", "Fish"]}
+        >>> split_categories(groceries)
+        (['Fresh Produce'], ['Meat & Seafood'])
     """
-    print(groceries)
     total_items = sum(len(groceries[cat]) for cat in categories)
     target_items = total_items // 2
 

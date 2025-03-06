@@ -10,5 +10,6 @@ CATEGORIES = ("Fresh Produce", "Meat & Seafood",
               "Pet Supplies")
 
 CSV_HEADERS = ["category", "grocery_items"]
-FILEPATH = "list.txt"
-DEFAULT_GROCERIES = "default_groceries.csv"
+
+SUPABASE_DEFAULT_TABLE = "default_groceries"
+SUPABASE_GROCERY_TABLE = "grocery_list"
