@@ -62,7 +62,7 @@ def get_list() -> list[str]:
                 SUPABASE_GROCERY_TABLE).select("*").execute()
             if response.data:
                 # Extract the "groceries" list from the JSON
-                groceries = response.data[0]
+                groceries = response.data[1]
                 # Return the list with proper title casing
                 return [better_title(item) for item in groceries]
             else:
