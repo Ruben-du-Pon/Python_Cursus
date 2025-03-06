@@ -1,7 +1,6 @@
 import streamlit as st
 import functions
-import os
-from config import CATEGORIES, FILEPATH
+from config import CATEGORIES
 from styles import MOBILE_STYLES
 
 
@@ -12,10 +11,6 @@ st.set_page_config(page_title="Grocery List", page_icon="🛒", layout="wide")
 st.markdown('<div id="top" style="position: absolute; top: 0;"></div>',
             unsafe_allow_html=True)
 
-# Create files if they don't exist
-if not os.path.exists(FILEPATH):
-    with open(FILEPATH, "w") as file:
-        pass
 
 # Initialize lists
 grocery_list = functions.get_list()
