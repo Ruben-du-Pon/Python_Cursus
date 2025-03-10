@@ -1,6 +1,7 @@
 import streamlit as st
 import functions
-from config import CATEGORIES
+from datetime import datetime
+from config import CATEGORIES, WRITE_INTERVAL
 from styles import MOBILE_STYLES
 
 
@@ -12,11 +13,22 @@ st.markdown('<div id="top" style="position: absolute; top: 0;"></div>',
             unsafe_allow_html=True)
 
 
-# Initialize lists
+# Initialize data on app start
 grocery_list = functions.get_list()
 groceries = functions.get_groceries()
 added_groceries = []
 categories_col1, categories_col2 = functions.split_categories(groceries)
+
+# Track last write time
+if 'last_write_time' not in st.session_state:
+    st.session_state['last_write_time'] = datetime.now()
+
+# Write the grocery list to the database every 5 minutes
+if (datetime.now() - st.session_state['last_write_time']).seconds > \
+        WRITE_INTERVAL:
+    functions.write_list(grocery_list)
+    functions.write_groceries(groceries)
+    st.session_state['last_write_time'] = datetime.now()
 
 
 def add_groceries() -> None:
@@ -32,9 +44,16 @@ def add_groceries() -> None:
         if grocery not in grocery_list:
             grocery_list.append(grocery.title())
 
-    functions.write_list(grocery_list)
     functions.clear_session_state(st.session_state, added_groceries)
     added_groceries.clear()
+
+
+def remove_groceries() -> None:
+    """
+    Update the groceries dictionary by removing the added groceries.
+    """
+    global groceries
+    groceries = functions.remove_groceries(groceries, added_groceries)
 
 
 # Expander to show the default grocery list and add items to the current list
@@ -55,7 +74,9 @@ with st.expander(label="Add grocery item"):
         if cat not in CATEGORIES:
             st.error("Please select a category")
             st.stop()
-        functions.add_default_groceries(cat, st.session_state, groceries)
+        groceries = functions.add_default_groceries(cat,
+                                                    st.session_state,
+                                                    groceries)
         st.rerun()
 
     # Links to navigate the categories
@@ -87,8 +108,7 @@ with st.expander(label="Add grocery item"):
     with col4:
         st.button(label="Remove from standard list",
                   key="remove_button",
-                  on_click=functions.remove_groceries,
-                  args=(groceries, added_groceries))
+                  on_click=remove_groceries)
 
 
 # Display the grocery list
@@ -98,6 +118,5 @@ for grocery in grocery_list:
     checkbox = st.checkbox(grocery, key=grocery)
     if checkbox:
         grocery_list.remove(grocery)
-        functions.write_list(grocery_list)
         del st.session_state[grocery]
         st.rerun()

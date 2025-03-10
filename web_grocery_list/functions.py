@@ -156,7 +156,7 @@ def write_groceries(groceries: dict[str, list]) -> None:
 
 # Grocery Management Functions
 def add_default_groceries(category: str, session_state: dict[str, Any],
-                          groceries: dict[str, list]) -> None:
+                          groceries: dict[str, list]) -> dict[str, list]:
     """
     Add a new grocery item to the default grocery list
 
@@ -166,7 +166,7 @@ def add_default_groceries(category: str, session_state: dict[str, Any],
         groceries -- The dictionary of grocery categories and items
 
     Returns:
-        None
+        groceries -- The updated dictionary of grocery categories and items
     """
     if "new_grocery" in session_state:
         grocery = session_state["new_grocery"]
@@ -174,11 +174,11 @@ def add_default_groceries(category: str, session_state: dict[str, Any],
             groceries[category] = []
         if grocery not in groceries[category]:
             groceries[category].append(grocery.title())
-        write_groceries(groceries)
+    return groceries
 
 
 def remove_groceries(groceries: dict[str, list],
-                     added_groceries: list[str]) -> None:
+                     added_groceries: list[str]) -> dict[str, list]:
     """
     Remove grocery items from the default grocery list.
 
@@ -187,14 +187,14 @@ def remove_groceries(groceries: dict[str, list],
         added_groceries -- The list of added groceries
 
     Returns:
-        None
+        groceries -- The updated dictionary of grocery categories and items
     """
     for grocery in added_groceries:
         for key in groceries:
             if grocery.strip() in groceries[key]:
                 groceries[key].remove(grocery.strip())
-    write_groceries(groceries)
     added_groceries.clear()
+    return groceries
 
 
 def process_grocery_input(session_state: dict[str, Any],
@@ -205,8 +205,8 @@ def process_grocery_input(session_state: dict[str, Any],
 
     Arguments:
         session_state -- The Streamlit session state dictionary
-        CATEGORIES: List of valid grocery categories
         groceries: Dictionary mapping categories to their grocery items
+        categories: List of valid grocery categories
 
     Returns:
         None

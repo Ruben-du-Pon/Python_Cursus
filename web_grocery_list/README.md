@@ -39,7 +39,8 @@ web_grocery_list/
 ├── config.py            # Application constants
 ├── functions.py         # Core functionality
 ├── main.py              # Streamlit app entry point
-└── requirements.txt     # Project dependencies
+├── requirements.txt     # Project dependencies
+└── styles.py            # CSS styles
 ```
 
 ## Usage
