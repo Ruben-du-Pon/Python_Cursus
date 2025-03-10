@@ -1,5 +1,6 @@
 import cv2
 import time
+import glob
 from mailing import send_email
 
 video = cv2.VideoCapture(0)
@@ -7,6 +8,8 @@ time.sleep(5)
 
 first_frame = None
 status_list = []
+count = 0
+
 while True:
     status = 0
     check, frame = video.read()
@@ -31,12 +34,16 @@ while True:
         rectangle = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
         if rectangle.any():
             status = 1
-            send_email()
+            cv2.imwrite(f"images/{count}.png", frame)
+            count += 1
+            all_images = glob.glob("images/*.png")
+            index = all_images // 2
+            middle_image = all_images[index]
 
     status_list.append(status)
     status_list = status_list[-2:]
     if status_list == [1, 0]:
-        send_email()
+        send_email(middle_image)
 
     cv2.imshow("webcam_capture", frame)
 
