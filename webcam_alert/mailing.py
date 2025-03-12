@@ -7,7 +7,7 @@ from email.message import EmailMessage
 load_dotenv()
 
 
-def send_email(image_path):
+def send_email(image_path: str) -> None:
     host = "smtp.gmail.com"
     port = 587
 
