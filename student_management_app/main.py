@@ -2,7 +2,8 @@ import sys
 import sqlite3
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget, \
     QTableWidgetItem, QDialog, QLineEdit, QVBoxLayout, QComboBox, \
-    QPushButton, QHeaderView, QToolBar
+    QPushButton, QHeaderView, QToolBar, QStatusBar, QHBoxLayout, QLabel, \
+    QMessageBox
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow):
 
         about_action = QAction("&About", self)
         help_menu_item.addAction(about_action)
+        about_action.triggered.connect(self.about)
 
         search_action = QAction(QIcon("icons/search.png"), "&Search", self)
         search_action.triggered.connect(self.search)
@@ -49,6 +51,27 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
         toolbar.addAction(add_student_action)
         toolbar.addAction(search_action)
+
+        # Create a status bar
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
+
+        # Detect a cell selection
+        self.table.cellClicked.connect(self.selected)
+
+    def selected(self):
+        children = self.findChildren(QPushButton)
+        if children:
+            for child in children:
+                self.statusbar.removeWidget(child)
+
+        edit_button = QPushButton("Edit")
+        edit_button.clicked.connect(self.edit)
+        self.statusbar.addWidget(edit_button)
+
+        delete_button = QPushButton("Delete")
+        delete_button.clicked.connect(self.delete)
+        self.statusbar.addWidget(delete_button)
 
     def load_data(self):
         connection = sqlite3.connect("database.db")
@@ -86,6 +109,18 @@ class MainWindow(QMainWindow):
 
     def search(self):
         dialog = SearchDialog()
+        dialog.exec()
+
+    def edit(self):
+        dialog = EditDialog()
+        dialog.exec()
+
+    def delete(self):
+        dialog = DeleteDialog()
+        dialog.exec()
+
+    def about(self):
+        dialog = AboutDialog()
         dialog.exec()
 
 
@@ -159,19 +194,148 @@ class SearchDialog(QDialog):
 
     def search(self):
         name = self.search_input.text()
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM students WHERE name = ?",
-                                (name,))
-        rows = list(result)
-        print(rows)
         items = main_window.table.findItems(
             name, Qt.MatchFlag.MatchFixedString)
         for item in items:
-            print(item)
             main_window.table.item(item.row(), 1).setSelected(True)
+
+
+class EditDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Edit")
+        self.setFixedWidth(300)
+        self.setFixedHeight(350)
+
+        layout = QVBoxLayout()
+
+        # Get the selected row
+        index = main_window.table.currentRow()
+        name = main_window.table.item(index, 1).text()
+        course = main_window.table.item(index, 2).text()
+        phone = main_window.table.item(index, 3).text().lstrip("+")
+        self.student_id = main_window.table.item(index, 0).text()
+
+        # Create widgets
+        self.student_name = QLineEdit(name)
+        self.student_name.setPlaceholderText("Name")
+
+        self.course_name = QComboBox()
+        courses = ["Biology", "Physics", "Mathematics", "Astronomy"]
+        self.course_name.addItems(courses)
+        self.course_name.setCurrentText(course)
+
+        self.phone_number = QLineEdit(phone)
+        self.phone_number.setPlaceholderText("Phone Number")
+
+        button = QPushButton("Submit")
+        button.clicked.connect(self.edit_student)
+
+        # Add widgets to layout
+        layout.addWidget(self.student_name)
+        layout.addWidget(self.course_name)
+        layout.addWidget(self.phone_number)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def edit_student(self):
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("UPDATE students SET name = ?, course = ?, mobile = ? WHERE id = ?",  # noqa: E501
+                       (self.student_name.text(),
+                        self.course_name.itemText(self.course_name.currentIndex()),  # noqa: E501
+                        self.phone_number.text(),
+                        self.student_id))
+        connection.commit()
         cursor.close()
         connection.close()
+        main_window.load_data()
+        self.close()
+
+
+class DeleteDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Delete")
+
+        # Get the selected row
+        index = main_window.table.currentRow()
+        self.name = main_window.table.item(index, 1).text()
+        self.course = main_window.table.item(index, 2).text()
+        self.phone = main_window.table.item(index, 3).text().lstrip("+")
+        self.student_id = main_window.table.item(index, 0).text()
+
+        layout = QVBoxLayout()
+        layout.setSpacing(0)
+
+        # Add confirmation message
+        message = QLabel("Are you sure you want to delete this student?")
+        layout.addWidget(message)
+
+        layout.addSpacing(20)
+
+        # Add student details
+        layout.addWidget(QLabel(f"Name: {self.name}"))
+        layout.addWidget(QLabel(f"Course: {self.course}"))
+        layout.addWidget(QLabel(f"Phone: {self.phone}"))
+
+        layout.addSpacing(20)
+
+        # Create horizontal button layout
+        button_layout = QHBoxLayout()
+        ok_button = QPushButton("Ok")
+        ok_button.clicked.connect(self.delete_student)
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(self.close)
+        button_layout.addWidget(ok_button)
+        button_layout.addWidget(cancel_button)
+
+        layout.addLayout(button_layout)
+
+        self.setLayout(layout)
+
+    def delete_student(self):
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM students WHERE id = ?",
+                       (self.student_id, ))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_data()
+        self.close()
+
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("Success")
+        confirmation_widget.setText(
+            f"Sucessfully deleted {self.name} from the student records")
+        confirmation_widget.exec()
+
+
+class AboutDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("About")
+        # Create layout
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 25, 10)
+
+        # Create label with content
+        content = """
+        This app was created during the course "The Python Mega Course".
+        Feel free to modify and reuse this app.
+        """
+        label = QLabel(content)
+        label.setWordWrap(True)  # Enable text wrapping
+        layout.addWidget(label)
+
+        # Add OK button
+        button = QPushButton("OK")
+        button.clicked.connect(self.close)
+        layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.setLayout(layout)
 
 
 app = QApplication(sys.argv)
