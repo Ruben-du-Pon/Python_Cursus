@@ -13,7 +13,7 @@ USERNAME = os.getenv("DEMOQA_USERNAME")
 PASSWORD = os.getenv("DEMOQA_PASSWORD")
 
 
-class WebAutomation():
+class WebAutomation:
     """
     Class for automating web tasks.
     """
